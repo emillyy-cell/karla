@@ -69,11 +69,103 @@ consecutivas acima do limite para que o relatório final seja exibido.
 Nenhuma estrutura `for` é utilizada para controlar o monitoramento ou a validação de
 entradas, conforme exigido.
 
+## 5. Como executar
+
+O programa foi escrito em C padrão (ANSI C / C89 compatível) e pode ser compilado com o
+GCC.
+
+**Linux / macOS:**
+```bash
+gcc monitoramento.c -o monitoramento
+./monitoramento
+```
+
+**Windows (terminal do VS Code, com o MinGW/GCC instalado):**
+```bash
+gcc monitoramento.c -o monitoramento.exe
+./monitoramento.exe
+```
+
+Após a execução, o programa solicita o limite de temperatura e, em seguida, as leituras
+sucessivas, uma a uma.
+
+## 6. Testes realizados
+
+### Teste 1 — Validação de entradas inválidas
+
+**Objetivo:** verificar se o programa trata corretamente uma entrada não numérica, tanto
+no limite quanto nas leituras de temperatura.
+
+**Procedimento:** ao ser solicitado o valor, foi digitado um caractere não numérico
+(por exemplo, a letra `a`).
+
+**Resultado obtido:** o programa exibiu a mensagem `"Entrada invalida! Digite um valor
+numerico..."`, limpou o buffer de entrada e solicitou o valor novamente, sem avançar a
+lógica do monitoramento nem contabilizar a tentativa inválida como uma leitura.
+
+📷 Evidência: `evidencias/teste01.png`
+
+### Teste 2 — Temperaturas acima do limite, porém não consecutivas
+
+**Objetivo:** verificar se o contador de leituras consecutivas é reiniciado corretamente
+quando a sequência é interrompida.
+
+**Procedimento:** com um limite definido (por exemplo, 30°C), foram informadas
+temperaturas alternando entre valores acima e abaixo do limite (ex.: 32, 28, 35, 25, 33).
+
+**Resultado obtido:** a cada vez que uma temperatura ficou dentro do limite, o contador
+`consecutivasAcima` voltou a zero e o monitoramento continuou normalmente, sem encerrar,
+mesmo havendo várias leituras acima do limite ao longo do teste.
+
+📷 Evidência: `evidencias/teste02.png`
+
+### Teste 3 — Três temperaturas consecutivas acima do limite
+
+**Objetivo:** verificar o encerramento automático do monitoramento.
+
+**Procedimento:** com o mesmo limite definido, foram informadas três temperaturas
+seguidas, todas acima do limite (ex.: 32, 34, 36).
+
+**Resultado obtido:** após a terceira leitura consecutiva acima do limite, o laço de
+monitoramento foi encerrado automaticamente e o programa exibiu o relatório final,
+contendo o total de leituras, a média, a maior e a menor temperatura, a quantidade de
+leituras acima do limite, o percentual acima do limite e o motivo do encerramento.
+
+📷 Evidência: `evidencias/teste03.png`
+
+## Questão final de reflexão
+
+Optei por combinar as duas estruturas, `while` e `do...while`, porque cada uma resolve um
+problema diferente dentro do mesmo programa. O `do...while` foi usado nos pontos em que a
+ação (pedir um valor ao usuário) **precisa acontecer pelo menos uma vez antes de qualquer
+verificação**: não faz sentido testar se a entrada é válida antes de ela existir, então o
+laço primeiro executa a leitura e só depois avalia a condição de repetição. Essa diferença
+foi essencial na validação do limite e das temperaturas: se eu tivesse usado um `while`
+comum ali, precisaria de uma leitura "fantasma" antes do laço só para inicializar a
+variável testada na condição, o que deixaria o código mais confuso e redundante.
+
+Já o `while` foi usado no laço principal de monitoramento, onde a condição (três leituras
+consecutivas acima do limite) só pode ser avaliada **depois de já existir pelo menos uma
+leitura**, mas o número total de repetições não é conhecido previamente — pode ser 3
+leituras ou 300. Testar a condição antes de cada nova iteração é o que permite ao programa
+parar exatamente no momento certo, assim que a condição de encerramento é satisfeita, sem
+executar uma iteração a mais desnecessária.
+
+Ou seja, a diferença entre testar a condição antes (`while`) ou depois (`do...while`) da
+execução do bloco foi importante justamente para casar cada estrutura com a natureza do
+problema que ela resolve: uma entrada que sempre precisa ocorrer pelo menos uma vez
+(`do...while`) e um monitoramento que pode ou não continuar, dependendo de um estado que só
+existe depois da primeira leitura (`while`).
+
 ## Estrutura do repositório
 
 ```text
 desafio-monitoramento/
 │
 ├── monitoramento.c
-└── README.md
+├── README.md
+└── evidencias/
+    ├── teste01.png
+    ├── teste02.png
+    └── teste03.png
 ```
